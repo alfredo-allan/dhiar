@@ -1,0 +1,25 @@
+# dependências
+/node_modules
+/.pnp
+.pnp.*
+
+# Next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# Vercel
+.vercel
+
+# segredos
+.env
+.env.local
+.env.*.local
+
+# sistema / editores
+.DS_Store
+*.pem
+npm-debug.log*
+pnpm-debug.log*

@@ -1,0 +1,227 @@
+@import "tailwindcss";
+@import "@fontsource-variable/manrope";
+@import "@fontsource/playfair-display/400.css";
+@import "@fontsource/playfair-display/500.css";
+@import "@fontsource/playfair-display/400-italic.css";
+
+/* `dark:` controlado pela classe `.dark` no <html> (ThemeContext), não só
+   por `prefers-color-scheme`. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   Tokens da marca DHIAR (tirados do logo): cobre metálico, champagne e
+   preto-café. O tema ESCURO é o padrão da marca; o claro usa papel creme.
+   Para ajustar a identidade, mude só este bloco.
+   --------------------------------------------------------------------------- */
+:root {
+  --background: #f6efe6;
+  --foreground: #1a120d;
+  --surface: #fffbf6;
+  --surface-2: #efe3d4;
+  --muted: #6e5b4c;
+  --line: #e3d3c1;
+  --accent: #a55e2c;
+  --accent-strong: #8a4a1f;
+  --accent-ink: #fff8f0;
+  --success: #2f6b4f;
+  --danger: #a33a32;
+  --copper-1: #e7a673;
+  --copper-2: #b9703d;
+  --copper-3: #8e4c22;
+  --champagne: #ebc7a6;
+}
+
+.dark {
+  --background: #0b0b0c;
+  --foreground: #efdcc6;
+  --surface: #15100d;
+  --surface-2: #1e1612;
+  --muted: #a8927e;
+  --line: #2e231c;
+  --accent: #c27b45;
+  --accent-strong: #de9966;
+  --accent-ink: #120b07;
+  --success: #86c7a3;
+  --danger: #e08a82;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-ink: var(--accent-ink);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-copper-1: var(--copper-1);
+  --color-copper-2: var(--copper-2);
+  --color-copper-3: var(--copper-3);
+  --color-champagne: var(--champagne);
+
+  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Playfair Display", ui-serif, Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --radius-app: 14px;
+}
+
+/* A paleta `neutral` do Tailwind vira uma escala quente: as telas herdadas
+   do projeto base (conta, checkout, admin) usam `neutral-*` e passam a
+   combinar com a identidade nova sem precisar ser reescritas. */
+@theme {
+  --color-neutral-50: #faf5ef;
+  --color-neutral-100: #f2e8dd;
+  --color-neutral-200: #e3d3c1;
+  --color-neutral-300: #ccb7a2;
+  --color-neutral-400: #a8927e;
+  --color-neutral-500: #806b5b;
+  --color-neutral-600: #5f4d40;
+  --color-neutral-700: #43352b;
+  --color-neutral-800: #2e231c;
+  --color-neutral-900: #1a120d;
+  --color-neutral-950: #0b0b0c;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html {
+  /* Sem flash branco antes do CSS/tema carregar. */
+  background-color: #0b0b0c;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Portal de entrada já visto nesta sessão: some antes da primeira pintura. */
+.entry-seen [data-entry-gate] {
+  display: none;
+}
+
+/* No escuro, o corpo fica transparente para o fundo de fumaça/madeira
+   (`SiteBackdrop`) aparecer; o <html> segura o preto-café. */
+.dark body {
+  background: transparent;
+}
+
+/* Em @layer components: utilitários do Tailwind (ex.: tracking-*) vencem. */
+@layer components {
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+}
+
+/* Alvo de toque mínimo de 44px (WCAG 2.5.5) em botões de ícone. */
+.tap-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scroll-cue {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(200%);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 55s linear infinite;
+}
+
+/* Revelações com GSAP: o estado inicial (invisível) é aplicado pelo
+   próprio GSAP dentro de useGSAP, nunca por CSS - se o JS falhar ou o
+   usuário preferir menos movimento, o conteúdo continua visível. */
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-down,
+  .animate-slide-up {
+    animation-duration: 0.01ms;
+  }
+
+  .animate-marquee {
+    animation-play-state: paused;
+  }
+}
+
+/* Texto com brilho de cobre (títulos de destaque). */
+.text-copper {
+  background: linear-gradient(120deg, var(--copper-1), var(--copper-2) 45%, var(--copper-1) 70%, var(--copper-3));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
