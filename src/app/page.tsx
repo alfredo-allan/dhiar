@@ -1,5 +1,5 @@
 import { BrandHero } from "@/components/home/BrandHero";
-import { TrustBar } from "@/components/home/TrustBar";
+import { BrandMarquee } from "@/components/home/BrandMarquee";
 import { ProductGrid } from "@/components/home/ProductGrid";
 import { CategoryTiles } from "@/components/home/CategoryTiles";
 import { CATEGORY_TILES } from "@/lib/categoryTiles";
@@ -98,7 +98,7 @@ export default async function Home() {
   return (
     <>
       <BrandHero />
-      <TrustBar commerce={commerce} />
+      <BrandMarquee />
       <ProductGrid
         eyebrow="Os favoritos"
         title="Mais vendidos"

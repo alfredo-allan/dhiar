@@ -270,6 +270,16 @@ body {
   animation: marquee 55s linear infinite;
 }
 
+/* Letreiro da marca na home: mais rápido no celular, mais calmo no desktop. */
+.brand-marquee {
+  animation: marquee 32s linear infinite;
+}
+@media (min-width: 1024px) {
+  .brand-marquee {
+    animation-duration: 48s;
+  }
+}
+
 /* Revelações com GSAP: o estado inicial (invisível) é aplicado pelo
    próprio GSAP dentro de useGSAP, nunca por CSS - se o JS falhar ou o
    usuário preferir menos movimento, o conteúdo continua visível. */
@@ -281,7 +291,8 @@ body {
     animation-duration: 0.01ms;
   }
 
-  .animate-marquee {
+  .animate-marquee,
+  .brand-marquee {
     animation-play-state: paused;
   }
 }
