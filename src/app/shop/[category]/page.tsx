@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { getCategoryBySlug } from "@/data/categories";
 import { getCommerceSettings, listProducts, type ProductSort } from "@/lib/products";
 import { ALL_PRODUCTS_CATEGORY_ID } from "@/data/categories";
+
+const UNISEX_CATEGORY_ID = "perfume-unissex";
 import { PerfumeListing } from "@/components/category/PerfumeListing";
 
 interface CategoryPageParams {
@@ -40,10 +42,11 @@ export default async function CategoryPage({
   searchParams,
 }: {
   params: Promise<CategoryPageParams>;
-  searchParams: Promise<{ sort?: string; marca?: string }>;
+  searchParams: Promise<{ sort?: string; marca?: string; q?: string }>;
 }) {
   const { category: slug } = await params;
-  const { sort, marca } = await searchParams;
+  const { sort, marca, q } = await searchParams;
+  const search = q?.trim().slice(0, 80) || undefined;
   const category = getCategoryBySlug(slug);
 
   if (!category) {
@@ -51,10 +54,16 @@ export default async function CategoryPage({
   }
 
   const [products, commerce] = await Promise.all([
-    listProducts({
-      category: category.id === ALL_PRODUCTS_CATEGORY_ID ? undefined : category.id,
-      revalidate: 60,
-    }),
+    listProducts(
+      category.id === UNISEX_CATEGORY_ID
+        ? // "Unissex" é um estilo, não uma prateleira: junta os compartilháveis de todas as categorias
+          { genders: ["unissex"], q: search, revalidate: 60 }
+        : {
+            category: category.id === ALL_PRODUCTS_CATEGORY_ID ? undefined : category.id,
+            q: search,
+            revalidate: 60,
+          },
+    ),
     getCommerceSettings().catch(() => null),
   ]);
 
@@ -65,6 +74,7 @@ export default async function CategoryPage({
       freeShippingThreshold={commerce?.freeShippingThreshold ?? 0}
       initialSort={(sort as ProductSort) ?? "best_sellers"}
       initialBrands={marca ? marca.split(",") : []}
+      searchTerm={search}
     />
   );
 }

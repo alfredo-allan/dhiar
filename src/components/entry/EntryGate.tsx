@@ -11,7 +11,7 @@ import { gsap, useGSAP, MOTION_QUERIES } from "@/lib/motion";
 const PERFUMES = "PERFUMES".split("");
 
 /** Rotas onde o portal nunca aparece (trabalho interno). */
-const SKIP_PREFIXES = ["/admin", "/login", "/api"];
+const SKIP_PREFIXES = ["/admin", "/api"];
 
 /**
  * Portal de entrada da DHIAR (uma vez por sessão, como no Scathon).
@@ -21,6 +21,11 @@ const SKIP_PREFIXES = ["/admin", "/login", "/api"];
  * linhas de cobre, "Sinta a essência", moldura fina à direita e embaixo.
  * Enquanto a página carrega, uma linha de progresso preenche; depois aparece
  * ENTRAR. Ao entrar, a cortina sobe e o hero da home começa a animação.
+ *
+ * O ENTRAR foi pensado para o toque (no celular não existe hover): é uma
+ * pílula de cobre preenchida com uma seta, com anéis que "respiram" em volta,
+ * um brilho que passa de tempos em tempos e uma resposta visível ao toque.
+ * A linha de carregamento se recolhe e o botão nasce no mesmo lugar.
  *
  * Acessível: é um diálogo modal com foco no botão; Enter/Esc também entram.
  */
@@ -112,27 +117,43 @@ function EntryGateScreen() {
     { scope: rootRef },
   );
 
+  // A linha de carregamento se recolhe e o botão "nasce" no lugar dela.
   useEffect(() => {
     if (!canEnter) return;
-    gsap.fromTo("[data-gate-enter]", { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.8, ease: "power3.out" });
+    const q = gsap.utils.selector(rootRef.current);
+    gsap
+      .timeline()
+      .to(q("[data-gate-loader]"), { scaleX: 0, autoAlpha: 0, duration: 0.45, ease: "power2.in" })
+      .fromTo(
+        q("[data-gate-enter]"),
+        { autoAlpha: 0, scale: 0.6 },
+        { autoAlpha: 1, scale: 1, duration: 0.9, ease: "elastic.out(1, 0.6)" },
+        0.25,
+      )
+      .fromTo(q("[data-gate-hint]"), { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0.6);
     buttonRef.current?.focus({ preventScroll: true });
   }, [canEnter]);
 
   const enter = useCallback(() => {
     const root = rootRef.current;
-    if (!root || exitingRef.current) return;
+    if (!root || !canEnter || exitingRef.current) return;
     exitingRef.current = true;
     if (reducedMotion) {
       markEntrySeen();
       return;
     }
+    // Vibração curtinha no Android (o iOS ignora) confirma o toque.
+    navigator.vibrate?.(12);
     const q = gsap.utils.selector(root);
     gsap
       .timeline({ onComplete: markEntrySeen })
-      .to(q("[data-gate-content]"), { scale: 1.08, autoAlpha: 0, duration: 0.9, ease: "power3.in" }, 0)
-      .to(q("[data-gate-enter]"), { autoAlpha: 0, duration: 0.3 }, 0)
-      .to(root, { yPercent: -100, duration: 1.1, ease: "power4.inOut" }, 0.55);
-  }, [reducedMotion]);
+      // Resposta ao toque: o botão "afunda", acende e solta uma onda de cobre.
+      .to(q("[data-gate-button]"), { scale: 0.93, filter: "brightness(1.25)", duration: 0.12, ease: "power2.out" }, 0)
+      .to(q("[data-gate-button]"), { scale: 1, duration: 0.35, ease: "back.out(3)" }, 0.12)
+      .fromTo(q("[data-gate-burst]"), { autoAlpha: 0.9, scale: 1 }, { autoAlpha: 0, scale: 3.2, duration: 0.8, ease: "power2.out" }, 0.05)
+      .to(q("[data-gate-content]"), { scale: 1.08, autoAlpha: 0, duration: 0.9, ease: "power3.in" }, 0.25)
+      .to(root, { yPercent: -100, duration: 1.1, ease: "power4.inOut" }, 0.8);
+  }, [reducedMotion, canEnter]);
 
   useEffect(() => {
     if (!canEnter) return;
@@ -192,23 +213,49 @@ function EntryGateScreen() {
           SINTA A ESSÊNCIA
         </p>
 
-        <div className="mt-10 flex flex-col items-center gap-4 sm:mt-12">
-          <div className="h-px w-40 overflow-hidden bg-[#c27b45]/20" aria-hidden>
-            <div data-gate-progress className="h-full w-full origin-left scale-x-0 bg-gradient-to-r from-[#8e4c22] via-[#de9966] to-[#c27b45]" />
+        <div className="mt-10 flex flex-col items-center gap-5 sm:mt-12">
+          {/* Mesmo lugar: primeiro a linha de carregamento, depois o botão. */}
+          <div className="relative flex h-16 items-center justify-center">
+            <div data-gate-loader className="absolute h-px w-40 overflow-hidden bg-[#c27b45]/20" aria-hidden>
+              <div data-gate-progress className="h-full w-full origin-left scale-x-0 bg-gradient-to-r from-[#8e4c22] via-[#de9966] to-[#c27b45]" />
+            </div>
+
+            <div data-gate-enter className="relative" style={{ visibility: "hidden" }}>
+              {/* Anéis que "respiram" em volta: chamam o dedo sem precisar de hover */}
+              <span aria-hidden className="gate-ring pointer-events-none absolute inset-0 rounded-full border border-[#de9966]/80" />
+              <span aria-hidden className="gate-ring gate-ring--late pointer-events-none absolute inset-0 rounded-full border border-[#de9966]/80" />
+              {/* Onda disparada no toque */}
+              <span data-gate-burst aria-hidden className="pointer-events-none absolute inset-0 rounded-full bg-[#de9966]/40 opacity-0" />
+
+              <button
+                ref={buttonRef}
+                data-gate-button
+                type="button"
+                onClick={enter}
+                // aria-disabled em vez de disabled: o Firefox restaura o estado
+                // "disabled" ao recarregar a página e isso quebrava a hidratação.
+                aria-disabled={!canEnter}
+                className="group relative flex min-h-14 touch-manipulation select-none items-center gap-5 overflow-hidden rounded-full bg-[linear-gradient(135deg,#f3bd8c_0%,#de9966_25%,#c27b45_58%,#8e4c22_100%)] py-2 pl-10 pr-2 text-[13px] font-semibold uppercase tracking-[0.42em] text-[#140c07] shadow-[0_12px_32px_-10px_rgba(222,153,102,0.7),inset_0_1px_0_rgba(255,236,214,0.65),inset_0_-1px_0_rgba(60,28,10,0.55)] transition-[transform,filter] duration-200 [-webkit-tap-highlight-color:transparent] hover:brightness-110 active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#de9966] sm:text-sm"
+              >
+                {/* Brilho metálico que atravessa o botão de tempos em tempos */}
+                <span aria-hidden className="gate-shimmer pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-[#fff3e4]/60 to-transparent" />
+                <span className="relative">Entrar</span>
+                <span
+                  aria-hidden
+                  className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#140c07] text-[#de9966] shadow-[inset_0_1px_0_rgba(222,153,102,0.25)]"
+                >
+                  <svg viewBox="0 0 24 24" className="gate-arrow h-[18px] w-[18px] transition-transform duration-300 group-hover:translate-x-1" fill="none">
+                    <path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              </button>
+            </div>
           </div>
-          <button
-            ref={buttonRef}
-            data-gate-enter
-            type="button"
-            onClick={enter}
-            disabled={!canEnter}
-            style={{ visibility: "hidden" }}
-            className="group relative min-h-12 overflow-hidden rounded-full border border-[#c27b45]/70 px-12 text-xs font-semibold uppercase tracking-[0.5em] text-[#efdcc6] transition-colors hover:border-[#de9966] hover:text-[#120b07] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#de9966]"
-          >
-            <span className="absolute inset-0 -z-10 origin-left scale-x-0 bg-gradient-to-r from-[#de9966] to-[#c27b45] transition-transform duration-500 group-hover:scale-x-100" />
-            Entrar
-          </button>
-          <p className="text-[10px] uppercase tracking-[0.3em] text-[#a8927e]/80">Arraste o monograma para girar</p>
+
+          <p data-gate-hint className="text-[10px] uppercase tracking-[0.3em] text-[#a8927e]/80" style={{ visibility: "hidden" }}>
+            <span className="pointer-coarse:hidden">Clique em entrar · arraste o logo para girar</span>
+            <span className="hidden pointer-coarse:inline">Toque em entrar · gire o logo</span>
+          </p>
         </div>
       </div>
 

@@ -12,10 +12,13 @@ interface ProductPageParams {
   product: string;
 }
 
-// Sem `generateStaticParams()` - mesma razão de `/shop/[category]`: o
-// catálogo agora vem do backend real (`@/lib/products`), então uma lista de
-// slugs fixa no build ficaria desatualizada assim que um produto novo fosse
-// cadastrado no painel admin. Cada produto é buscado sob demanda abaixo.
+// As páginas de produto saem prontas no build (o catálogo está no repositório
+// e cada publicação do admin gera um deploy novo).
+export async function generateStaticParams() {
+  const products = await listProducts();
+  return products.map((product) => ({ category: product.category, product: product.slug }));
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -23,7 +26,6 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { product: slug } = await params;
   const product = await getProductBySlug(slug);
-
   if (!product) {
     return { title: pageTitle("Produto não encontrado") };
   }

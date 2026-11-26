@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { popularCategories } from "@/data/categories";
-import { searchableCatalog } from "@/lib/products";
+import { searchableCatalog } from "@/lib/clientCatalog";
 import type { Product } from "@/types";
 
 interface SearchOverlayProps {

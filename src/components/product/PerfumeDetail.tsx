@@ -6,18 +6,15 @@ import { Heart, Minus, Plus, ShieldCheck, Truck, RotateCcw } from "lucide-react"
 import type { Category, Product, ProductVariant } from "@/types";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useAddToCart } from "@/hooks/useAddToCart";
-import { defaultVariant } from "@/lib/products";
-import { getProductReviews, type ProductReviewsPage } from "@/lib/reviews";
+import { defaultVariant } from "@/lib/catalog";
 import { concentrationLabel, formatBRL, genderLabel } from "@/lib/format";
 import { gsap, useGSAP, MOTION_QUERIES } from "@/lib/motion";
 import { ProductGallery } from "./ProductGallery";
 import { ProductImage } from "./ProductImage";
-import { ShippingEstimator } from "./ShippingEstimator";
-import { NotifyMeButton } from "./NotifyMeButton";
+import { WhatsAppButton } from "./WhatsAppButton";
 import { PriceBlock } from "./PriceBlock";
 import { VariantSelector } from "./VariantSelector";
 import { NotesPyramid } from "./NotesPyramid";
-import { StarRating } from "./StarRating";
 import { ProductCard } from "./ProductCard";
 
 interface PerfumeDetailProps {
@@ -39,7 +36,6 @@ export function PerfumeDetail({ product, category, relatedProducts }: PerfumeDet
   const [selected, setSelected] = useState<ProductVariant | undefined>(() => defaultVariant(product));
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
-  const [reviews, setReviews] = useState<ProductReviewsPage | null>(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
   const buyButtonRef = useRef<HTMLButtonElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -57,16 +53,6 @@ export function PerfumeDetail({ product, category, relatedProducts }: PerfumeDet
     ),
     [product],
   );
-
-  useEffect(() => {
-    let cancelled = false;
-    getProductReviews(product.slug)
-      .then((page) => !cancelled && setReviews(page))
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, [product.slug]);
 
   // Barra fixa do celular: aparece quando o botão principal sai da tela.
   useEffect(() => {
@@ -145,11 +131,6 @@ export function PerfumeDetail({ product, category, relatedProducts }: PerfumeDet
                 .filter(Boolean)
                 .join(" · ")}
             </p>
-            {(reviews?.reviewCount ?? product.reviewCount) > 0 && (
-              <div className="mt-3">
-                <StarRating rating={reviews?.rating ?? product.rating} reviewCount={reviews?.reviewCount ?? product.reviewCount} />
-              </div>
-            )}
           </header>
 
           {!isUnavailable && (
@@ -175,7 +156,7 @@ export function PerfumeDetail({ product, category, relatedProducts }: PerfumeDet
 
           <div data-pdp-reveal className="flex flex-col gap-3">
             {isUnavailable ? (
-              <NotifyMeButton productId={product.id} size="lg" />
+              <WhatsAppButton product={product} unavailable size="lg" />
             ) : (
               <div className="flex gap-3">
                 <div className="flex items-center rounded-full border border-line">
@@ -225,8 +206,11 @@ export function PerfumeDetail({ product, category, relatedProducts }: PerfumeDet
             </ul>
           </div>
 
-          <div data-pdp-reveal>
-            <ShippingEstimator variantId={selected?.id} />
+          <div data-pdp-reveal className="flex flex-col gap-3 rounded-app border border-line bg-surface/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted">
+              Frete e prazo para o seu CEP são combinados pelo WhatsApp ao fechar o pedido.
+            </p>
+            {!isUnavailable && <WhatsAppButton product={product} variantLabel={selected?.label} className="shrink-0" />}
           </div>
 
           {product.notes && (
@@ -262,21 +246,6 @@ export function PerfumeDetail({ product, category, relatedProducts }: PerfumeDet
           )}
         </div>
       </div>
-
-      {reviews && reviews.items.length > 0 && (
-        <section aria-labelledby="avaliacoes" className="mt-16 border-t border-line pt-10">
-          <h2 id="avaliacoes" className="font-display mb-6 text-3xl">Quem usou, conta</h2>
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {reviews.items.slice(0, 6).map((review) => (
-              <li key={review.id} className="rounded-app border border-line bg-surface p-5">
-                <StarRating rating={review.rating} reviewCount={0} />
-                {review.comment && <p className="mt-3 text-sm leading-relaxed">{review.comment}</p>}
-                <p className="mt-3 text-xs text-muted">{review.author}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
 
       {relatedProducts.length > 0 && (
         <section aria-labelledby="relacionados" className="mt-16">

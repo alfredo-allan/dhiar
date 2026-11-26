@@ -1,5 +1,5 @@
 import { BadgePercent, CreditCard, ShieldCheck, Truck } from "lucide-react";
-import type { CommerceSettings } from "@/lib/products";
+import type { CommerceSettings } from "@/lib/catalog";
 import { formatBRL } from "@/lib/format";
 
 /** Argumentos de compra logo abaixo do hero - os números vêm da API. */

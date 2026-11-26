@@ -6,12 +6,12 @@ import { Eye, Heart, ShoppingBag } from "lucide-react";
 import type { Product, ProductVariant } from "@/types";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useAddToCart } from "@/hooks/useAddToCart";
-import { defaultVariant } from "@/lib/products";
+import { defaultVariant } from "@/lib/catalog";
 import { concentrationLabel } from "@/lib/format";
 import { ProductImage } from "./ProductImage";
 import { PriceBlock } from "./PriceBlock";
 import { VariantSelector } from "./VariantSelector";
-import { NotifyMeButton } from "./NotifyMeButton";
+import { WhatsAppButton } from "./WhatsAppButton";
 import { QuickViewModal } from "./QuickViewModal";
 
 interface ProductCardProps {
@@ -23,8 +23,12 @@ interface ProductCardProps {
 
 /**
  * Card de perfume no padrão de conversão da referência: selo de desconto,
- * frete grátis, seletor de volume, de/por, preço no Pix, parcelas e dois
- * botões - "Comprar" (adiciona direto) e "Espiar" (visualização rápida).
+ * frete grátis, seletor de volume, de/por, preço no Pix, parcelas e um único
+ * botão principal, "Comprar", na largura toda (alvo grande para o polegar).
+ *
+ * As ações secundárias ficam sobre a foto, empilhadas no canto: favoritar e
+ * "Espiar" (visualização rápida). No desktop o "Espiar" se abre mostrando o
+ * texto quando o mouse passa pelo card; no celular é um círculo sempre visível.
  */
 export function ProductCard({ product, freeShippingThreshold = 0, priority }: ProductCardProps) {
   const [selected, setSelected] = useState<ProductVariant | undefined>(() => defaultVariant(product));
@@ -71,21 +75,41 @@ export function ProductCard({ product, freeShippingThreshold = 0, priority }: Pr
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            toggleSaved(product.id);
-          }}
-          aria-pressed={isLiked}
-          aria-label={isLiked ? "Remover dos favoritos" : "Salvar nos favoritos"}
-          className="tap-target absolute right-2 top-2 z-10 flex items-center justify-center rounded-full text-foreground"
-        >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface/85 backdrop-blur transition-transform hover:scale-110">
-            <Heart className={`h-4 w-4 ${isLiked ? "fill-danger text-danger" : ""}`} strokeWidth={1.75} />
-          </span>
-        </button>
+        <div className="absolute right-2 top-2 z-10 flex flex-col items-end">
+          <button
+            type="button"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              toggleSaved(product.id);
+            }}
+            aria-pressed={isLiked}
+            aria-label={isLiked ? "Remover dos favoritos" : "Salvar nos favoritos"}
+            className="tap-target flex items-center justify-center rounded-full text-foreground"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface/85 backdrop-blur transition-transform hover:scale-110">
+              <Heart className={`h-4 w-4 ${isLiked ? "fill-danger text-danger" : ""}`} strokeWidth={1.75} />
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              setQuickViewOpen(true);
+            }}
+            aria-label={`Espiar ${product.title}`}
+            className="tap-target flex items-center justify-end rounded-full text-foreground"
+          >
+            <span className="flex h-9 items-center justify-end rounded-full bg-surface/85 pr-2.5 pl-2.5 backdrop-blur transition-colors hover:bg-accent hover:text-accent-ink">
+              <span className="max-w-0 overflow-hidden whitespace-nowrap text-xs font-semibold opacity-0 transition-[max-width,opacity,margin] duration-300 group-hover:mr-1.5 group-hover:max-w-20 group-hover:opacity-100">
+                Espiar
+              </span>
+              <Eye className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
+            </span>
+          </button>
+        </div>
 
         <ProductImage
           src={product.coverImage ?? product.imageUrl}
@@ -120,28 +144,17 @@ export function ProductCard({ product, freeShippingThreshold = 0, priority }: Pr
 
         <div className="mt-auto pt-1">
           {isUnavailable ? (
-            <NotifyMeButton productId={product.id} size="sm" />
+            <WhatsAppButton product={product} unavailable className="w-full" />
           ) : (
-            <div className="grid grid-cols-[1fr_auto] gap-2">
-              <button
-                type="button"
-                onClick={() => addToCart(product, selected)}
-                disabled={variants.length > 0 && !selected?.inStock}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-foreground px-4 text-sm font-semibold text-background transition-colors hover:bg-accent hover:text-accent-ink disabled:opacity-40"
-              >
-                <ShoppingBag className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-                Comprar
-              </button>
-              <button
-                type="button"
-                onClick={() => setQuickViewOpen(true)}
-                aria-label={`Espiar ${product.title}`}
-                className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-line px-4 text-sm font-medium text-foreground transition-colors hover:border-foreground"
-              >
-                <Eye className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-                <span className="hidden sm:inline">Espiar</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => addToCart(product, selected)}
+              disabled={variants.length > 0 && !selected?.inStock}
+              className="inline-flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-full bg-foreground px-4 text-sm font-semibold text-background transition-[background-color,color,transform] hover:bg-accent hover:text-accent-ink active:scale-[0.97] disabled:opacity-40"
+            >
+              <ShoppingBag className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden />
+              Comprar
+            </button>
           )}
         </div>
       </div>

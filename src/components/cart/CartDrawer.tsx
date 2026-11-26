@@ -29,14 +29,8 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
  * the request, while still leaving a sliver of backdrop to tap-to-close),
  * `sm:w-full sm:max-w-md` from tablet up (a fixed ~448px pane).
  *
- * "Finalizar Compra" below routes to `/cart`, not straight to
- * `/checkout` - `<CheckoutView/>` refuses to render anything past a
- * prompt until `selection.confirmedAt` is set, and that shipping-method
- * step only lives on `/cart`, so sending the shopper there first is what
- * actually gets them to checkout fastest. This drawer intentionally
- * doesn't try to calculate shipping or show a free-shipping progress bar
- * itself - that whole flow (CEP lookup, Melhor Envio quotes) belongs to
- * `<CartView/>` alone, so it isn't duplicated here.
+ * "Finalizar pelo WhatsApp" leva para `/cart`, onde o pedido é revisado e
+ * enviado como mensagem (sem conta e sem checkout próprio).
  */
 export function CartDrawer() {
   const { items, cartCount, totalAmount, updateQuantity, removeItem, isDrawerOpen, closeCartDrawer } = useCart();
@@ -132,9 +126,9 @@ export function CartDrawer() {
               <Link
                 href="/cart"
                 onClick={closeCartDrawer}
-                className="mt-4 block w-full rounded-app bg-neutral-950 py-3.5 text-center text-xs font-semibold uppercase tracking-widest text-neutral-50 transition-opacity hover:opacity-85 dark:bg-neutral-100 dark:text-neutral-950"
+                className="mt-4 block w-full rounded-full bg-accent py-3.5 text-center text-xs font-semibold uppercase tracking-widest text-accent-ink transition-colors hover:bg-accent-strong"
               >
-                Finalizar Compra
+                Finalizar pelo WhatsApp
               </Link>
               <button
                 type="button"

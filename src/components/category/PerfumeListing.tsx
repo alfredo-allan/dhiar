@@ -1,12 +1,14 @@
 "use client";
 
+import Link from "next/link";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import type { Category, Gender, Product } from "@/types";
 import { ProductCard } from "@/components/product/ProductCard";
 import { genderLabel } from "@/lib/format";
 import { gsap, ScrollTrigger, useGSAP, MOTION_QUERIES } from "@/lib/motion";
-import type { ProductSort } from "@/lib/products";
+import type { ProductSort } from "@/lib/catalog";
 
 interface PerfumeListingProps {
   category: Category;
@@ -15,6 +17,8 @@ interface PerfumeListingProps {
   initialSort?: ProductSort;
   /** Slugs de marca vindos da URL (`?marca=lattafa,armaf`). */
   initialBrands?: string[];
+  /** Busca vinda da URL (`?q=bergamota`): nome, marca, família ou notas. */
+  searchTerm?: string;
 }
 
 const PRICE_RANGES = [
@@ -53,6 +57,7 @@ export function PerfumeListing({
   freeShippingThreshold = 0,
   initialSort = "best_sellers",
   initialBrands = [],
+  searchTerm,
 }: PerfumeListingProps) {
   const [brands, setBrands] = useState<Set<string>>(() => new Set(initialBrands));
   const [genders, setGenders] = useState<Set<Gender>>(new Set());
@@ -221,7 +226,24 @@ export function PerfumeListing({
     <div className="mx-auto w-full max-w-7xl px-4 pb-16 pt-8 sm:px-6 lg:px-8">
       <header className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent">Coleção</p>
-        <h1 className="font-display mt-2 text-4xl sm:text-5xl">{category.label}</h1>
+        {searchTerm ? (
+          <>
+            <h1 className="font-display mt-2 text-4xl sm:text-5xl">
+              <span className="text-muted">“</span>
+              {searchTerm}
+              <span className="text-muted">”</span>
+            </h1>
+            <p className="mt-2 text-sm text-muted">
+              Busca por nome, marca, família olfativa ou notas
+              {" · "}
+              <Link href={category.href} className="text-foreground underline underline-offset-4 hover:text-accent">
+                limpar busca
+              </Link>
+            </p>
+          </>
+        ) : (
+          <h1 className="font-display mt-2 text-4xl sm:text-5xl">{category.label}</h1>
+        )}
         <p className="mt-2 text-sm text-muted">{filtered.length} {filtered.length === 1 ? "perfume" : "perfumes"}</p>
       </header>
 

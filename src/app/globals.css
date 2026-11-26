@@ -4,13 +4,13 @@
 @import "@fontsource/playfair-display/500.css";
 @import "@fontsource/playfair-display/400-italic.css";
 
-/* `dark:` controlado pela classe `.dark` no <html> (ThemeContext), não só
-   por `prefers-color-scheme`. */
+/* O site é só tema escuro: a classe `.dark` fica fixa no <html> (layout.tsx).
+   Os tokens do tema claro abaixo ficam guardados caso ele volte um dia. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ---------------------------------------------------------------------------
    Tokens da marca DHIAR (tirados do logo): cobre metálico, champagne e
-   preto-café. O tema ESCURO é o padrão da marca; o claro usa papel creme.
+   preto-café. O site usa só o tema ESCURO; o bloco claro (:root) fica guardado.
    Para ajustar a identidade, mude só este bloco.
    --------------------------------------------------------------------------- */
 :root {
@@ -178,6 +178,74 @@ body {
 
 .animate-slide-up {
   animation: slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Botão ENTRAR do portal (EntryGate): pensado para o toque, sem depender de hover. */
+@keyframes gate-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  100% {
+    transform: scale(1.18, 1.75);
+    opacity: 0;
+  }
+}
+.gate-ring {
+  animation: gate-ring 2.6s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+.gate-ring--late {
+  animation-delay: 1.3s;
+}
+@keyframes gate-shimmer {
+  0%,
+  55% {
+    transform: translateX(-120%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(420%) skewX(-20deg);
+  }
+}
+.gate-shimmer {
+  animation: gate-shimmer 3.6s ease-in-out infinite;
+}
+@keyframes gate-arrow {
+  0%,
+  70%,
+  100% {
+    transform: translateX(0);
+  }
+  80% {
+    transform: translateX(5px);
+  }
+  90% {
+    transform: translateX(-1px);
+  }
+}
+.gate-arrow {
+  animation: gate-arrow 2.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gate-ring,
+  .gate-shimmer,
+  .gate-arrow {
+    animation: none;
+  }
+  .gate-ring {
+    opacity: 0;
+  }
+}
+
+/* legenda da vitrine de filmes (FilmReel) */
+@keyframes reel-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes scroll-cue {

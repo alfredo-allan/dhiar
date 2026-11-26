@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { getProductsByIds } from "@/lib/products";
+import { getProductsByIds } from "@/lib/clientCatalog";
 import { useWishlist } from "@/hooks/useWishlist";
 import { ProductCard } from "@/components/product/ProductCard";
 import type { Product } from "@/types";
@@ -13,14 +13,11 @@ import type { Product } from "@/types";
  * de detalhe; ambos escrevem no mesmo `useWishlist()`, então esta página é o
  * único lugar pra onde os dois levam de volta).
  *
- * `savedIds` continua vindo de `useWishlist()` (os ids em si ainda são só do
- * navegador - não há endpoint de "favoritos" no backend), mas resolver
- * esses ids em produtos de verdade agora é assíncrono (`getProductsByIds` -
- * ver `@/lib/products`), já que o catálogo em si vem do backend real, não
- * mais do array estático em `@/data/products`.
+ * Os ids ficam no próprio aparelho (`useWishlist()`); os produtos vêm do
+ * catálogo publicado (`@/lib/clientCatalog`).
  */
 export function WishlistView() {
-  const { savedIds } = useWishlist();
+  const { savedIds, isLoading: isLoadingIds } = useWishlist();
   const [savedProducts, setSavedProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -63,7 +60,7 @@ export function WishlistView() {
         Curtidos <span className="text-base font-normal text-neutral-500 dark:text-neutral-400">({savedProducts.length})</span>
       </h1>
 
-      {isLoading ? (
+      {isLoading || isLoadingIds ? (
         <p className="mt-8 text-sm text-neutral-500 dark:text-neutral-400">Carregando curtidos…</p>
       ) : savedProducts.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-24 text-center">

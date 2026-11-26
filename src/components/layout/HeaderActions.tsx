@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useCart } from '@/hooks/useCart'
 import { CartBadge } from './CartBadge'
-import { ThemeToggle } from './ThemeToggle'
-import { UserAvatar } from './UserAvatar'
+import { WhatsAppLink } from './WhatsAppLink'
 
 /** Generic "more actions" glyph - the mobile chip's default, cart-less state. */
 function MoreGlyph() {
@@ -181,7 +180,7 @@ export function HeaderActions({ onSearchOpen }: HeaderActionsProps) {
 
         <div
           className={`flex h-10 items-center gap-2 overflow-hidden transition-[width] duration-300 ease-out ${
-            expanded ? 'w-[156px] pr-4' : 'pointer-events-none w-0 pr-0'
+            expanded ? 'w-[120px] pr-4' : 'pointer-events-none w-0 pr-0'
           }`}>
           <SearchButton
             onClick={() => {
@@ -190,21 +189,19 @@ export function HeaderActions({ onSearchOpen }: HeaderActionsProps) {
             }}
             className="flex h-8 w-8 shrink-0 items-center justify-center text-neutral-700 dark:text-neutral-200"
           />
-          <ThemeToggle />
-          <UserAvatar />
+          <WhatsAppLink />
           <CartBadge />
         </div>
       </div>
 
       {/* Tablet/desktop: no collapsing, icons sit side by side as usual -
           just noticeably bigger than before. `<SearchButton/>` already
-          takes a size prop, so that one's sized directly; `<ThemeToggle/>`,
-          `<UserAvatar/>` and `<CartBadge/>` don't (they're shared - the
-          same three components render inside the mobile pill above *and*
+          takes a size prop, so that one's sized directly; `<WhatsAppLink/>`
+          and `<CartBadge/>` don't (they're shared - the same components render inside the mobile pill above *and*
           inside `<FloatingDock/>`, both deliberately kept at their own
           sizes), so each gets wrapped in its own `scale-*` transform
           instead of touching the shared component. Exactly the same
-          technique `<FloatingDock/>` already uses to size these same three
+          technique `<FloatingDock/>` already uses to size these same
           components up on its own. `origin-right` (they're the last thing
           in a `justify-self-end` column) grows each one back toward the
           wordmark instead of pushing past the header's own right edge. */}
@@ -215,10 +212,7 @@ export function HeaderActions({ onSearchOpen }: HeaderActionsProps) {
           iconClassName="h-6 w-6 lg:h-7 lg:w-7"
         />
         <div className="origin-right scale-125 lg:scale-150">
-          <ThemeToggle />
-        </div>
-        <div className="origin-right scale-125 lg:scale-150">
-          <UserAvatar />
+          <WhatsAppLink />
         </div>
         <div className="origin-right scale-125 lg:scale-150">
           <CartBadge />

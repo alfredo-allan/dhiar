@@ -1,0 +1,7 @@
+Coloque aqui os logos OFICIAIS dos parceiros (baixe do kit de marca de cada empresa):
+
+  mercado-pago.svg   -> https://www.mercadopago.com.br/developers (seção de logos / marca)
+  melhor-envio.svg   -> kit de marca do Melhor Envio (site/suporte do Melhor Envio)
+
+Use a versão branca/monocromática para fundo escuro, se a empresa oferecer.
+Enquanto o arquivo não existir, o rodapé mostra o nome escrito no lugar do logo.

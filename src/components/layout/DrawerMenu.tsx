@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useTheme } from "@/hooks/useTheme";
+import { STORE } from "@/lib/store";
+import { whatsappUrl } from "@/lib/whatsapp";
 import { popularCategories } from "@/data/categories";
 
 interface DrawerMenuProps {
@@ -16,9 +16,6 @@ interface DrawerMenuProps {
  * (capped at `max-w-sm` on larger viewports).
  */
 export function DrawerMenu({ open, onClose }: DrawerMenuProps) {
-  const { isAuthenticated, isAdmin, user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-
   // Lock body scroll while the drawer is open.
   useEffect(() => {
     if (!open) return;
@@ -78,54 +75,15 @@ export function DrawerMenu({ open, onClose }: DrawerMenuProps) {
             ))}
           </ul>
 
-          {/*
-            "Minha Conta", "Entrar / Criar Conta" and "Painel Admin" all
-            point at real pages now (`/account`, `/login`, `/admin`) - the
-            real gate on that last one is `src/proxy.ts` (a signed, server-
-            checked cookie), so hiding this link from non-admin visitors
-            here is only ever a UX nicety, not the actual security boundary.
-          */}
-          <div className="mt-8 border-t border-neutral-200 dark:border-neutral-800 pt-4 flex flex-col gap-3 text-sm">
-            {isAuthenticated ? (
-              <>
-                <span className="text-neutral-500 dark:text-neutral-400">
-                  Olá, {user?.displayName}
-                </span>
-                <Link href="/account" onClick={onClose}>
-                  Minha Conta
-                </Link>
-                {isAdmin && (
-                  <Link href="/admin" onClick={onClose}>
-                    Painel Admin
-                  </Link>
-                )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    logout();
-                    onClose();
-                  }}
-                  className="text-left text-neutral-500 dark:text-neutral-400"
-                >
-                  Sair
-                </button>
-              </>
-            ) : (
-              <Link href="/login" onClick={onClose}>
-                Entrar / Criar Conta
-              </Link>
-            )}
+          <div className="mt-8 flex flex-col gap-3 border-t border-neutral-200 pt-4 text-sm dark:border-neutral-800">
+            <Link href="/wishlist" onClick={onClose}>
+              Meus favoritos
+            </Link>
+            <a href={whatsappUrl(`Olá, ${STORE.name}! Vim pelo site e queria uma ajuda.`)} target="_blank" rel="noreferrer">
+              Atendimento no WhatsApp
+            </a>
           </div>
         </nav>
-
-        <button
-          type="button"
-          onClick={toggleTheme}
-          className="m-4 flex items-center justify-between rounded-app border border-neutral-200 dark:border-neutral-800 px-4 py-3 text-xs uppercase tracking-widest text-neutral-600 dark:text-neutral-400"
-        >
-          <span>Tema</span>
-          <span>{theme === "dark" ? "Escuro" : "Claro"}</span>
-        </button>
       </aside>
     </>
   );

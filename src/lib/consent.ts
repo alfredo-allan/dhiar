@@ -1,7 +1,6 @@
 "use client";
 
 import { createPersistedStore } from "./createPersistedStore";
-import { apiFetch } from "./apiClient";
 import { STORE, storageKey } from "./store";
 
 /**
@@ -45,17 +44,9 @@ export function saveConsent(choice: { analytics: boolean; marketing: boolean }):
     anonymousId: current.anonymousId || newAnonymousId(),
   };
   consentStore.setValue(next);
-  // Prova do consentimento no servidor (LGPD art. 8º §2º). Falha de rede
-  // não bloqueia a navegação - a escolha já vale localmente.
-  apiFetch("/consent", {
-    method: "POST",
-    body: {
-      anonymousId: next.anonymousId,
-      policyVersion: next.policyVersion,
-      analytics: next.analytics,
-      marketing: next.marketing,
-    },
-  }).catch(() => undefined);
+  // A escolha (com data e versão da política) fica registrada no aparelho.
+  // Sem servidor próprio, não há cópia remota - o site só carrega o Meta
+  // Pixel depois do "Aceitar", então nada é coletado antes do consentimento.
 }
 
 /** Reabre o banner (link "Preferências de cookies" no rodapé). */

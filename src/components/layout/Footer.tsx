@@ -1,33 +1,24 @@
 'use client'
 
 import { STORE } from "@/lib/store";
+import { whatsappUrl } from "@/lib/whatsapp";
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { config } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faInstagram, faTiktok, faPinterest } from '@fortawesome/free-brands-svg-icons'
 import { ContactModal } from './ContactModal'
+import { DhiarWordmark } from '@/components/brand/DhiarWordmark'
 
-// Same reasoning as `<TestimonialsCarousel/>`: render icons sized purely by
-// our own Tailwind classes instead of FontAwesome auto-injecting its own
-// <style> tag (which briefly flashes oversized icons on load). Set here
-// too, not just there - <Footer/> renders on every page via layout.tsx,
-// including ones that never mount <TestimonialsCarousel/> (e.g. /login),
-// so this can't rely on that other file's copy of the same line having
-// already run first.
+// Ícones dimensionados só pelas nossas classes (sem o <style> automático do FontAwesome).
 config.autoAddCss = false
 
 interface FooterLink {
   label: string
-  /** Omitido pra um link que não navega pra lugar nenhum - hoje só
-   * "Contato" (`isContactTrigger` abaixo), que abre o `<ContactModal/>`. */
   href?: string
-  /** Abre numa aba nova via `<a target="_blank">` em vez de `<Link>` do
-   * Next - pro "Rastrear Pedido" (Melhor Envio, um domínio de verdade fora
-   * do site), onde faz sentido o visitante nunca sair da própria loja. */
+  /** Abre em nova aba (sites externos, como o rastreio). */
   external?: boolean
-  /** "Contato" não é mais um link - abre o `<ContactModal/>` (pedido do
-   * Alfredo em 2026-10-11, substituindo o antigo placeholder "/"). */
+  /** "Contato" abre o <ContactModal/> em vez de navegar. */
   isContactTrigger?: boolean
 }
 
@@ -37,152 +28,213 @@ interface FooterSection {
   links: FooterLink[]
 }
 
-// Pedido do Alfredo em 2026-10-11: removida a coluna "Empresa" inteira
-// (Sobre Nós/Atacado/Trabalhe Conosco/Imprensa não existem ainda e não há
-// previsão de página própria pra nenhuma) e "Guia de Medidas" (sem conteúdo
-// pronto). "Menu" continua apontando pra "/" - mesmo motivo de antes (essas
-// páginas - todos os produtos, novidades, mais vendidos, SS26 - ainda não
-// existem como rotas próprias). "Trocas e Devoluções" e "Rastrear Pedido"
-// já têm destino real agora (ver `FooterLink` acima).
 const sections: FooterSection[] = [
   {
-    id: 'menu',
-    title: 'Menu',
+    id: 'loja',
+    title: 'Loja',
     links: [
-      { label: 'Todos os Perfumes', href: '/shop/todos' },
+      { label: 'Todos os perfumes', href: '/shop/todos' },
+      { label: 'Mais vendidos', href: '/shop/todos?sort=best_sellers' },
       { label: 'Novidades', href: '/shop/todos?sort=newest' },
-      { label: 'Mais Vendidos', href: '/shop/todos?sort=best_sellers' },
-      { label: 'Perfumes Árabes', href: '/shop/perfumes-arabes' }
-    ]
+      { label: 'Perfumes árabes', href: '/shop/perfumes-arabes' },
+      { label: 'Kits', href: '/shop/kits-de-perfumes' },
+    ],
   },
   {
-    id: 'support',
-    title: 'Suporte',
+    id: 'ajuda',
+    title: 'Ajuda',
     links: [
       { label: 'Contato', isContactTrigger: true },
-      { label: 'Trocas e Devoluções', href: '/politicas/trocas-e-devolucoes' },
-      { label: 'Rastrear Pedido', href: 'https://melhorrastreio.com.br/', external: true }
-    ]
+      { label: 'Pedir pelo WhatsApp', href: whatsappUrl(`Olá, ${STORE.name}! Vim pelo site e queria uma ajuda.`), external: true },
+      { label: 'Trocas e devoluções', href: '/politicas/trocas-e-devolucoes' },
+      { label: 'Envio e entrega', href: '/politicas/envio-e-entrega' },
+    ],
   },
   {
-    id: 'legal',
-    title: 'Privacidade',
+    id: 'politicas',
+    title: 'Políticas',
     links: [
-      { label: 'Política de Privacidade', href: '/politicas/privacidade' },
-      { label: 'Termos de Uso', href: '/politicas/termos' },
-      { label: 'Meus dados (LGPD)', href: '/account/privacidade' }
-    ]
-  }
+      { label: 'Pagamento e segurança', href: '/politicas/pagamento-e-seguranca' },
+      { label: 'Política de privacidade', href: '/politicas/privacidade' },
+      { label: 'Termos de uso', href: '/politicas/termos' },
+    ],
+  },
 ]
 
-// Real brand marks instead of text labels ("INSTAGRAM", "TIKTOK",
-// "YOUTUBE") - Alfredo wants icons that are actually representative of
-// each network, not their name spelled out. Icons render via `currentColor`
-// (see the `<FontAwesomeIcon/>` usage below), so they already pick up the
-// same `text-neutral-*`/`dark:text-neutral-*` treatment as everything else
-// in the footer and need no separate light/dark asset - "acompanhem o tema
-// do site" falls out of that for free.
 // Redes vêm de NEXT_PUBLIC_STORE_* - só aparece o que estiver preenchido.
 const socials = [
   { label: 'Instagram', href: STORE.instagram, icon: faInstagram },
   { label: 'TikTok', href: STORE.tiktok, icon: faTiktok },
-  { label: 'Pinterest', href: process.env.NEXT_PUBLIC_STORE_PINTEREST ?? '', icon: faPinterest }
+  { label: 'Pinterest', href: process.env.NEXT_PUBLIC_STORE_PINTEREST ?? '', icon: faPinterest },
 ].filter((social) => social.href)
 
+function TrustItem({ icon, title, children }: { icon: ReactNode; title: ReactNode; children: ReactNode }) {
+  return (
+    <div className="flex gap-4">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-accent/40 bg-accent/10 text-accent">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <div className="flex min-h-6 flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold text-foreground">{title}</div>
+        <p className="mt-1 text-xs leading-relaxed text-muted">{children}</p>
+      </div>
+    </div>
+  )
+}
+
+const iconProps = { viewBox: '0 0 24 24', className: 'h-5 w-5', fill: 'none', 'aria-hidden': true } as const
+
 /**
- * Site footer. Sections collapse into an accordion on mobile and expand
- * into plain columns from `sm` upward.
- *
- * Typography was bumped a full step up from the original `text-xs`
- * (12px)/`gap-2` combo - at desktop width, that size read as cramped and
- * "embaralhado" (jumbled) rather than organized into three clear columns.
- * `text-sm` links with more line gap (`gap-3`) and a clearer gap between
- * each heading and its own list (`mb-3`) give every column room to read as
- * its own group at a glance instead of a wall of small text.
- *
- * The whole content block is also capped at `max-w-[1200px] mx-auto` - the
- * same cap already used on `<FloatingDock/>` - so the columns don't stretch
- * edge-to-edge into huge, unevenly-spaced gaps on very wide desktop
- * monitors (exactly what made the columns feel scattered rather than
- * grouped in the screenshot Alfredo sent). Like the dock, this is a no-op
- * below 1200px - phones and most laptops are unaffected. Switched from a
- * 3-column `grid` to a `flex` row (`sm:flex-row`) since the "Empresa"
- * section was removed (pedido do Alfredo em 2026-10-11) - a 2-column grid
- * would've stretched "Menu"/"Suporte" to split the full 1200px width in
- * half, leaving a huge, unbalanced gap between them; `flex` sizes each
- * column to its own content instead, so the two stay close together like
- * in the original 3-column design.
+ * Rodapé da DHIAR.
+ * - Faixa de confiança no topo: pedido pelo WhatsApp, envio para todo o
+ *   Brasil e compra protegida (originais, HTTPS/LGPD).
+ * - Marca + redes, e três colunas (Loja, Ajuda, Políticas); no celular as
+ *   colunas viram acordeão.
+ * - Formas de pagamento escritas por extenso (sem logos de bandeiras) e a linha
+ *   legal (razão social/CNPJ).
  */
 export function Footer() {
   const [openSection, setOpenSection] = useState<string | null>(null)
   const [isContactOpen, setIsContactOpen] = useState(false)
 
   return (
-    <footer className="border-t border-neutral-200 dark:border-neutral-800 py-6 text-sm text-neutral-600 dark:text-neutral-400 px-4 md:px-8">
+    <footer className="relative border-t border-line bg-[#0b0b0c] px-4 pb-8 pt-12 text-sm text-muted md:px-8">
+      <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
       <div className="mx-auto max-w-[1200px]">
-        <div className="flex flex-col gap-0 sm:flex-row sm:gap-12 lg:gap-20">
-          {sections.map((section) => {
-            const isOpen = openSection === section.id
-            return (
-              <div key={section.id} className="border-b border-neutral-200 dark:border-neutral-800 sm:border-none">
-                <button
-                  type="button"
-                  onClick={() => setOpenSection((current) => (current === section.id ? null : section.id))}
-                  className="flex w-full items-center justify-between py-4 text-left text-sm font-semibold uppercase tracking-widest sm:tracking-[0.15em] text-neutral-900 dark:text-neutral-100 sm:pointer-events-none sm:pb-0 sm:mb-4">
-                  {section.title}
-                  <span className="sm:hidden" aria-hidden>
-                    {isOpen ? '−' : '+'}
-                  </span>
-                </button>
-                <ul
-                  className={`flex flex-col gap-3 overflow-hidden transition-all sm:block sm:space-y-3 sm:max-h-none sm:pb-2 ${
-                    isOpen ? 'max-h-96 pb-4' : 'max-h-0 sm:overflow-visible'
-                  }`}>
-                  {section.links.map((link) => (
-                    // Keyed by label - "Menu" ainda compartilha o
-                    // placeholder href "/" entre seus itens (ver o doc
-                    // comment de `sections` acima), então href sozinho não
-                    // é único; labels são únicas dentro de cada seção.
-                    <li key={link.label}>
-                      {link.isContactTrigger ? (
-                        <button
-                          type="button"
-                          onClick={() => setIsContactOpen(true)}
-                          className="hover:text-neutral-900 dark:hover:text-neutral-100">
-                          {link.label}
-                        </button>
-                      ) : link.external ? (
-                        <a href={link.href} target="_blank" rel="noreferrer" className="hover:text-neutral-900 dark:hover:text-neutral-100">
-                          {link.label}
-                        </a>
-                      ) : (
-                        <Link href={link.href ?? '/'} className="hover:text-neutral-900 dark:hover:text-neutral-100">
-                          {link.label}
-                        </Link>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )
-          })}
+        {/* faixa de confiança */}
+        <div className="grid gap-6 rounded-app border border-line bg-surface/60 p-5 sm:grid-cols-3 sm:gap-8 sm:p-6">
+          <TrustItem
+            icon={
+              <svg {...iconProps}>
+                <path d="M7 11V8a5 5 0 0 1 10 0v3M5.5 11h13v9.5h-13z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+                <path d="M12 15v2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            }
+            title={<span>Pedido pelo WhatsApp</span>}
+          >
+            Monte a sacola e envie o pedido: combinamos frete, Pix com desconto ou cartão e entrega direto com você.{' '}
+            <Link href="/politicas/pagamento-e-seguranca" className="text-foreground/80 underline underline-offset-2 hover:text-accent">
+              Como funciona
+            </Link>
+          </TrustItem>
+          <TrustItem
+            icon={
+              <svg {...iconProps}>
+                <path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+                <circle cx="7" cy="17.5" r="1.6" stroke="currentColor" strokeWidth="1.6" />
+                <circle cx="17" cy="17.5" r="1.6" stroke="currentColor" strokeWidth="1.6" />
+              </svg>
+            }
+            title={<span>Envio para todo o Brasil</span>}
+          >
+            Com código de rastreio e embalagem que protege o frasco.{' '}
+            <Link href="/politicas/envio-e-entrega" className="text-foreground/80 underline underline-offset-2 hover:text-accent">
+              Prazos e frete
+            </Link>
+          </TrustItem>
+          <TrustItem
+            icon={
+              <svg {...iconProps}>
+                <path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+                <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            }
+            title={<span>Compra protegida</span>}
+          >
+            Perfumes 100% originais, site criptografado (HTTPS), dados tratados conforme a LGPD e 7 dias para
+            desistir.{' '}
+            <Link href="/politicas/trocas-e-devolucoes" className="text-foreground/80 underline underline-offset-2 hover:text-accent">
+              Trocas
+            </Link>
+          </TrustItem>
         </div>
 
-        <div className="mt-8 flex flex-col gap-4 border-t border-neutral-200 dark:border-neutral-800 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-5 sm:gap-6">
-            {socials.map((social) => (
-              <a
-                key={social.label}
-                href={social.href}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={social.label}
-                className="text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
-                <FontAwesomeIcon icon={social.icon} className="h-5 w-5" aria-hidden />
-              </a>
-            ))}
+        <div className="mt-12 flex flex-col gap-10 lg:flex-row lg:justify-between lg:gap-16">
+          {/* marca */}
+          <div className="max-w-xs">
+            <Link href="/" aria-label={`${STORE.name} - página inicial`} className="inline-block text-foreground">
+              <DhiarWordmark tone="current" className="h-7 w-auto" />
+            </Link>
+            <p className="mt-4 text-sm leading-relaxed">
+              Perfumes originais das grandes casas, com curadoria e entrega para todo o Brasil.
+            </p>
+            {socials.length > 0 && (
+              <div className="mt-5 flex items-center gap-3">
+                {socials.map((social) => (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={social.label}
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-line text-foreground/80 transition-colors hover:border-accent hover:text-accent"
+                  >
+                    <FontAwesomeIcon icon={social.icon} className="h-4 w-4" aria-hidden />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
-          <p>&copy; {new Date().getFullYear()} {STORE.legalName || STORE.name}{STORE.cnpj ? ` · CNPJ ${STORE.cnpj}` : ""}. Todos os direitos reservados.</p>
+
+          {/* colunas (acordeão no celular) */}
+          <div className="flex flex-col sm:flex-row sm:gap-12 lg:gap-20">
+            {sections.map((section) => {
+              const isOpen = openSection === section.id
+              return (
+                <div key={section.id} className="border-b border-line sm:border-none">
+                  <button
+                    type="button"
+                    onClick={() => setOpenSection((current) => (current === section.id ? null : section.id))}
+                    aria-expanded={isOpen}
+                    className="flex min-h-12 w-full items-center justify-between text-left text-xs font-semibold uppercase tracking-[0.24em] text-accent sm:pointer-events-none sm:mb-4 sm:min-h-0"
+                  >
+                    {section.title}
+                    <span className="text-lg text-foreground/60 sm:hidden" aria-hidden>
+                      {isOpen ? '−' : '+'}
+                    </span>
+                  </button>
+                  <ul
+                    className={`flex flex-col gap-3 overflow-hidden transition-all sm:max-h-none sm:overflow-visible sm:pb-0 ${
+                      isOpen ? 'max-h-96 pb-5' : 'max-h-0'
+                    }`}
+                  >
+                    {section.links.map((link) => (
+                      <li key={link.label}>
+                        {link.isContactTrigger ? (
+                          <button type="button" onClick={() => setIsContactOpen(true)} className="transition-colors hover:text-foreground">
+                            {link.label}
+                          </button>
+                        ) : link.external ? (
+                          <a href={link.href} target="_blank" rel="noreferrer" className="transition-colors hover:text-foreground">
+                            {link.label}
+                          </a>
+                        ) : (
+                          <Link href={link.href ?? '/'} className="transition-colors hover:text-foreground">
+                            {link.label}
+                          </Link>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* formas de pagamento + linha legal */}
+        <div className="mt-12 flex flex-col gap-4 border-t border-line pt-6 text-xs lg:flex-row lg:items-center lg:justify-between">
+          <ul className="flex flex-wrap gap-2" aria-label="Formas de pagamento">
+            {['Pix', 'Cartão de crédito'].map((method) => (
+              <li key={method} className="rounded-full border border-line px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-foreground/70">
+                {method}
+              </li>
+            ))}
+          </ul>
+          <p>
+            &copy; {new Date().getFullYear()} {STORE.legalName || STORE.name}
+            {STORE.cnpj ? ` · CNPJ ${STORE.cnpj}` : ''}. Todos os direitos reservados.
+          </p>
         </div>
       </div>
 

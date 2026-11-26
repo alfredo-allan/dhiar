@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { ApiError } from "@/lib/apiClient";
-import { sendContactMessage } from "@/lib/contact";
+import { STORE } from "@/lib/store";
+import { whatsappUrl } from "@/lib/whatsapp";
 
 interface ContactModalProps {
   open: boolean;
@@ -16,9 +16,8 @@ interface ContactModalProps {
  * overlay em tela cheia que `<SearchOverlay/>` já usa (trava o scroll do
  * body enquanto aberto, fecha no "X" ou ao enviar com sucesso).
  *
- * Sem conta/token - qualquer visitante pode mandar, nome+e-mail+mensagem
- * só. O backend (`POST /api/v1/contact`) encaminha por e-mail pra loja - ver
- * `@/lib/contact`'s doc comment.
+ * Sem conta: "Enviar" abre o WhatsApp da loja com nome e mensagem já
+ * escritos (o atendimento acontece lá). O e-mail fica como alternativa.
  */
 export function ContactModal({ open, onClose }: ContactModalProps) {
   const [name, setName] = useState("");
@@ -52,22 +51,14 @@ export function ContactModal({ open, onClose }: ContactModalProps) {
     }, 200);
   }
 
-  async function handleSubmit(event: FormEvent) {
+  function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setErrorMessage(null);
     setIsSubmitting(true);
-    try {
-      await sendContactMessage(name.trim(), email.trim(), message.trim());
-      setIsSent(true);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof ApiError
-          ? error.message
-          : "Não deu pra enviar agora - tenta de novo em instantes.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+    const text = [`Olá, ${STORE.name}! Sou ${name.trim()}${email.trim() ? ` (${email.trim()})` : ""}.`, "", message.trim()].join("\n");
+    window.open(whatsappUrl(text), "_blank", "noopener,noreferrer");
+    setIsSent(true);
+    setIsSubmitting(false);
   }
 
   if (!open) return null;
@@ -107,7 +98,7 @@ export function ContactModal({ open, onClose }: ContactModalProps) {
                 strokeLinejoin="round"
               />
             </svg>
-            <span>Mensagem enviada! Vamos te responder por e-mail em breve.</span>
+            <span>Abrimos o WhatsApp com a sua mensagem - é só tocar em enviar por lá. Prefere e-mail? Escreva para {STORE.contactEmail}.</span>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -128,12 +119,11 @@ export function ContactModal({ open, onClose }: ContactModalProps) {
             </div>
             <div className="flex flex-col gap-1.5">
               <label htmlFor="contact-email" className="text-xs font-medium uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
-                E-mail
+                E-mail (opcional)
               </label>
               <input
                 id="contact-email"
                 type="email"
-                required
                 maxLength={254}
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
@@ -161,7 +151,7 @@ export function ContactModal({ open, onClose }: ContactModalProps) {
               disabled={isSubmitting}
               className="mt-2 w-full rounded-app bg-neutral-950 py-3.5 text-xs font-semibold uppercase tracking-widest text-neutral-50 transition-opacity hover:opacity-85 disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950"
             >
-              {isSubmitting ? "Enviando…" : "Enviar mensagem"}
+              {isSubmitting ? "Abrindo…" : "Enviar pelo WhatsApp"}
             </button>
           </form>
         )}

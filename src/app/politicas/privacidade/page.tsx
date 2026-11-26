@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { LegalPage } from "@/components/legal/LegalPage";
 import { STORE, pageTitle } from "@/lib/store";
 
@@ -31,10 +30,10 @@ export default function PrivacyPolicyPage() {
       <section>
         <h2>2. Quais dados coletamos e para quê</h2>
         <ul>
-          <li><strong>Cadastro</strong> (nome, e-mail, telefone, senha protegida por hash): criar e proteger sua conta. Base legal: execução de contrato.</li>
+          <li><strong>Pedido pelo WhatsApp</strong> (nome, telefone, CEP e o que você escrever na mensagem): atender e entregar o pedido. Base legal: execução de contrato. O site não tem cadastro nem senha de cliente.</li>
           <li><strong>Endereço e CPF/CNPJ</strong>: entregar o pedido e emitir a etiqueta de envio. Base legal: execução de contrato e obrigação legal.</li>
-          <li><strong>Pedidos e pagamentos</strong>: processar a compra, emitir nota fiscal e atender trocas. Os dados do cartão são tratados pelo Mercado Pago; nós não os armazenamos.</li>
-          <li><strong>Cookies necessários</strong> (sessão, sacola, tema): fazer a loja funcionar. Não dependem de consentimento.</li>
+          <li><strong>Pedidos e pagamentos</strong>: processar a compra, emitir nota fiscal e atender trocas. Os dados do cartão ficam só com a operadora do link de pagamento; nós não os recebemos nem armazenamos.</li>
+          <li><strong>Cookies necessários</strong> (sacola, favoritos e tema, guardados no seu aparelho): fazer a loja funcionar. Não dependem de consentimento.</li>
           <li><strong>Cookies de análise e marketing</strong>: só com o seu consentimento, que você pode retirar a qualquer momento.</li>
         </ul>
       </section>
@@ -42,9 +41,9 @@ export default function PrivacyPolicyPage() {
       <section>
         <h2>3. Com quem compartilhamos</h2>
         <ul>
-          <li>Mercado Pago (pagamentos).</li>
-          <li>Melhor Envio e transportadoras (entrega).</li>
-          <li>Provedor de e-mail (mensagens sobre o seu pedido).</li>
+          <li>WhatsApp (Meta), onde o pedido é conversado.</li>
+          <li>Operadora de pagamento (link de cartão), quando você escolhe pagar com cartão.</li>
+          <li>Correios e transportadoras (entrega).</li>
           <li>Meta (anúncios), apenas se você aceitar cookies de marketing.</li>
         </ul>
         <p>Não vendemos seus dados.</p>
@@ -53,8 +52,8 @@ export default function PrivacyPolicyPage() {
       <section>
         <h2>4. Por quanto tempo guardamos</h2>
         <p>
-          Dados de cadastro: enquanto a conta existir. Pedidos e notas fiscais: 5 anos, por obrigação fiscal, mesmo após a
-          exclusão da conta (sem seus dados de contato). Registros de consentimento: enquanto forem necessários para
+          Conversas e dados do pedido: pelo tempo necessário para atender, entregar e cuidar de trocas. Pedidos e notas
+          fiscais: 5 anos, por obrigação fiscal. Registros de consentimento: enquanto forem necessários para
           comprovar a sua escolha.
         </p>
       </section>
@@ -63,8 +62,7 @@ export default function PrivacyPolicyPage() {
         <h2>5. Seus direitos</h2>
         <p>
           Você pode confirmar o tratamento, acessar, corrigir, baixar (portabilidade) e excluir seus dados, além de revogar
-          consentimentos. Faça isso em{" "}
-          <Link href="/account/privacidade" className="underline">Privacidade e meus dados</Link> ou pelo e-mail do encarregado.
+          consentimentos. Faça isso pelo WhatsApp ou pelo e-mail do encarregado.
           Você também pode reclamar à ANPD.
         </p>
       </section>
@@ -72,8 +70,8 @@ export default function PrivacyPolicyPage() {
       <section>
         <h2>6. Segurança</h2>
         <p>
-          Usamos conexão criptografada (HTTPS), senhas com hash, sessão em cookie protegido contra acesso por scripts,
-          proteção contra CSRF, limite de tentativas de login e registro de ações administrativas.
+          Usamos conexão criptografada (HTTPS) e o painel administrativo é protegido por senha, com sessão em cookie
+          protegido contra acesso por scripts e limite de tentativas de login.
         </p>
       </section>
     </LegalPage>

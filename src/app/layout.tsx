@@ -31,26 +31,21 @@ export const viewport: Viewport = {
 // Chave do portal de entrada (mesma de `@/lib/entry`, sem importar código client).
 const ENTRY_KEY = storageKey("entry-seen");
 
-// Aplica o tema salvo (ou o do sistema) antes da primeira pintura - sem
-// "flash" de tema errado. A chave precisa ser a mesma do ThemeContext.
+// O site é só tema escuro (classe `dark` fixa no <html>). Este script só
+// marca o portal de entrada como visto antes da primeira pintura.
 const themeInitScript = `
   (function () {
     try {
-      var stored = window.localStorage.getItem(${JSON.stringify(storageKey("theme"))});
-      var parsed = stored && stored.charAt(0) === '"' ? JSON.parse(stored) : stored;
-      var theme = parsed === "light" ? "light" : "dark";
-      document.documentElement.classList.toggle("dark", theme === "dark");
       if (window.sessionStorage.getItem(${JSON.stringify(ENTRY_KEY)}) === "1") {
         document.documentElement.classList.add("entry-seen");
       }
-      document.documentElement.style.colorScheme = theme;
     } catch (e) {}
   })();
 `;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="pt-BR" data-scroll-behavior="smooth" className="dark h-full antialiased" suppressHydrationWarning>
+    <html lang="pt-BR" data-scroll-behavior="smooth" className="dark h-full antialiased" style={{ colorScheme: "dark" }} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>

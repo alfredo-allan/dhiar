@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useScrolledPast } from '@/hooks/useScrolledPast'
 import { FLOATING_NAV_SCROLL_THRESHOLD } from '@/lib/layoutConstants'
 import { CartBadge } from './CartBadge'
-import { UserAvatar } from './UserAvatar'
+import { WhatsAppLink } from './WhatsAppLink'
 
 /**
  * Floating "dock"-style anchor nav, inspired by a Linux Plank/macOS dock:
@@ -23,7 +23,7 @@ import { UserAvatar } from './UserAvatar'
  * Sized noticeably larger on desktop and only a touch larger on mobile
  * (padding/gap/icon size all scale up at `sm` and again at `lg`), so it
  * reads as a deliberate, roomy dock rather than the header's own compact
- * icon row. <CartBadge/> and <UserAvatar/> are reused as-is (so the live
+ * icon row. <CartBadge/> and <WhatsAppLink/> are reused as-is (so the live
  * count and sign-in state always match the header) but are visually
  * scaled up via a wrapping `scale-*` transform at each breakpoint instead
  * of resizing those two components themselves - they're also rendered
@@ -32,17 +32,13 @@ import { UserAvatar } from './UserAvatar'
  * from when this dock was first built.
  *
  * Left to right, per the requested layout:
- *  1. Recent orders - links to /account/orders (a panel/page with order
- *     history + reorder suggestions is planned there; the route doesn't
- *     exist yet, matching how /cart, /account and /login are already
- *     linked elsewhere in this app before their pages are built).
+ *  1. Catalog - links to /shop/todos (todos os perfumes).
  *  2. Wishlist - links to /wishlist (liked products; same "route not
  *     built yet" situation).
  *  3. Wordmark - links home, theme-aware like the header's own logo.
  *  4. Cart - reuses <CartBadge/> so the live item count always matches
  *     what the header shows (single source of truth: useCart()).
- *  5. Account - reuses <UserAvatar/> so it shows the same sign-in photo
- *     or initial the header does, via the same useAuth() state.
+ *  5. WhatsApp - reuses <WhatsAppLink/> (atendimento e pedidos).
  */
 export function FloatingDock() {
   const isVisible = useScrolledPast(FLOATING_NAV_SCROLL_THRESHOLD)
@@ -53,7 +49,7 @@ export function FloatingDock() {
       aria-hidden={!isVisible}
       // `inert` (a real DOM attribute React 19 passes through) removes
       // every descendant - including the ones inside <CartBadge/> and
-      // <UserAvatar/> - from focus and pointer interaction in one go
+      // <WhatsAppLink/> - from focus and pointer interaction in one go
       // whenever the dock is hidden, instead of hand-toggling `tabIndex`
       // on each link (which wouldn't reach those two reused components'
       // own internal <Link>s anyway).
@@ -75,12 +71,14 @@ export function FloatingDock() {
           Altura ajustada para h-14 / sm:h-16 / lg:h-20 para ser sutilmente menor. */}
       <div className="mx-auto flex h-12 w-full max-w-[800px] items-center justify-between rounded-2xl border border-black/5 bg-neutral-100/90 px-6 shadow-lg shadow-black/10 backdrop-blur-md dark:border-white/10 dark:bg-neutral-900/80 sm:h-16 sm:px-10 lg:h-[55px] lg:px-16">
         <Link
-          href="/account/orders"
-          aria-label="Últimas compras"
+          href="/shop/todos"
+          aria-label="Todos os perfumes"
           className="text-neutral-800 transition-colors hover:text-neutral-500 dark:text-neutral-100 dark:hover:text-neutral-400">
           <svg viewBox="0 0 24 24" className="h-6 w-6 sm:h-7 sm:w-7 lg:h-9 lg:w-9" fill="none" aria-hidden>
-            <path d="M4 7l8-4 8 4-8 4-8-4Z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round" />
-            <path d="M4 12l8 4 8-4M4 17l8 4 8-4" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round" />
+            <rect x="4" y="4" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.75" />
+            <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.75" />
+            <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.75" />
+            <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5" stroke="currentColor" strokeWidth="1.75" />
           </svg>
         </Link>
 
@@ -122,7 +120,7 @@ export function FloatingDock() {
         </div>
 
         <div className="scale-90 transition-transform sm:scale-100 lg:scale-110">
-          <UserAvatar />
+          <WhatsAppLink />
         </div>
       </div>
     </nav>
